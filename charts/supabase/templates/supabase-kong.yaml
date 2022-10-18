@@ -1,0 +1,189 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-kong-config
+  namespace: {{ .Release.Namespace }}
+data:
+  kong.yml: |
+    _format_version: "1.1"
+
+    ###
+    ### Consumers / Users
+    ###
+    consumers:
+      - username: anon
+        keyauth_credentials:
+          - key: {{ .Values.jwt.anon_key }}
+      - username: service_role
+        keyauth_credentials:
+          - key: {{ .Values.jwt.service_key }}
+
+    ###
+    ### Access Control List
+    ###
+    acls:
+      - consumer: anon
+        group: anon
+      - consumer: service_role
+        group: admin
+
+    ###
+    ### API Routes
+    ###
+    services:
+      ## Open Auth routes
+      - name: auth-v1-open
+        url: http://supabase-auth-service.{{ .Release.Namespace }}.svc.cluster.local/verify
+        routes:
+          - name: auth-v1-open
+            strip_path: true
+            paths:
+              - /auth/v1/verify
+        plugins:
+          - name: cors
+      - name: auth-v1-open-callback
+        url: http://supabase-auth-service.{{ .Release.Namespace }}.svc.cluster.local/callback
+        routes:
+          - name: auth-v1-open-callback
+            strip_path: true
+            paths:
+              - /auth/v1/callback
+        plugins:
+          - name: cors
+      - name: auth-v1-open-authorize
+        url: http://supabase-auth-service.{{ .Release.Namespace }}.svc.cluster.local/authorize
+        routes:
+          - name: auth-v1-open-authorize
+            strip_path: true
+            paths:
+              - /auth/v1/authorize
+        plugins:
+          - name: cors
+
+      ## Secure Auth routes
+      - name: auth-v1
+        _comment: "GoTrue: /auth/v1/* -> http://supabase-auth-service.{{ .Release.Namespace }}.svc.cluster.local/*"
+        url: http://supabase-auth-service.{{ .Release.Namespace }}.svc.cluster.local/
+        routes:
+          - name: auth-v1-all
+            strip_path: true
+            paths:
+              - /auth/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      ## Secure REST routes
+      - name: rest-v1
+        _comment: "PostgREST: /rest/v1/* -> http://supabase-rest-service.{{ .Release.Namespace }}.svc.cluster.local/*"
+        url: http://supabase-rest-service.{{ .Release.Namespace }}.svc.cluster.local/
+        routes:
+          - name: rest-v1-all
+            strip_path: true
+            paths:
+              - /rest/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: true
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      ## Secure Database routes
+      - name: meta
+        _comment: "pg-meta: /pg/* -> http://supabase-meta-service.{{ .Release.Namespace }}.svc.cluster.local/*"
+        url: http://supabase-meta-service.{{ .Release.Namespace }}.svc.cluster.local/
+        routes:
+          - name: meta-all
+            strip_path: true
+            paths:
+              - /pg/
+        plugins:
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-kong-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-kong
+  template:
+    metadata:
+      labels:
+        app: supabase-kong
+    spec:
+      containers:
+        - name: supabase-kong
+          image: {{ .Values.images.kong }}
+          ports:
+            - name: http
+              containerPort: 8000
+            - name: https
+              containerPort: 8443
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /var/lib/kong/kong.yml
+            - name: KONG_DNS_ORDER
+              value: LAST,A,CNAME
+            - name: KONG_PLUGINS
+              value: request-transformer,cors,key-auth,acl
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: kong-config
+              mountPath: /var/lib/kong
+      volumes:
+        - name: kong-config
+          configMap:
+            name: supabase-kong-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-kong-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-kong
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: https
+      protocol: TCP

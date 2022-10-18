@@ -1,0 +1,33 @@
+# Default values for nlp.
+# This is a YAML-formatted file.
+
+# The following secrets need to be provided in the namespace where you install this chart
+
+# youtube:
+#   api_key: secret-api-key
+
+# openweathermap:
+#   api_key: secret-api-key
+
+# ---
+# Declare variables to be passed into your templates below
+
+# storage class to be used for the PersistenVolumeClaims in this chart
+storageClass: hcloud-volumes
+# names of the secrets, that allow access to your container registries
+imagePullSecrets:
+  - name: meetap-container-registry
+
+# the api key will be loaded from an opaque secret
+youtubeApiSecret:
+  name: youtube # name of the secret
+  key: api_key # name of the key inside the secret (NOT the actual api key, just the reference to the key, holding the value inside the secret)
+
+# the api key will be loaded from an opaque secret
+openweathermapSecret:
+  name: openweathermap # name of the secret
+  key: api_key # name of the key inside the secret (NOT the actual api key, just the reference to the key, holding the value inside the secret)
+
+images:
+  rasa: rasa/rasa:3.2.10
+  rasaActions: docker.meetap.de/rewrite/rasa-actions:latest

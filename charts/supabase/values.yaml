@@ -1,0 +1,45 @@
+# Default values for supabase.
+# This is a YAML-formatted file.
+
+# The following secrets need to be provided in the namespace where you install this chart
+
+# postgres:
+#   username: secret-username
+#   password: secret-password
+
+# jwt:
+#   secret: some-long-secret
+#   anon_key: generated-anon-user-jwt
+#   service_key: generated-service-user-jwt
+
+# smtp:
+#   username: secret-username
+#   password: secret-password
+
+# ---
+# Declare variables to be passed into your templates below
+
+smtp:
+  admin_email: admin@email.com
+  sender_email: do-not-reply@email.com
+  host: email.com
+  port: 25
+
+jwt:
+  exp: 3600
+  anon_key: my-anon-jwt
+  service_key: my-service-jwt
+
+# storage class to be used for the PersistenVolumeClaims in this chart
+storageClass: hcloud-volumes
+# names of the secrets, that allow access to your container registries
+imagePullSecrets:
+  - name: meetap-container-registry
+
+images:
+  auth: supabase/gotrue:v2.16.6
+  db: supabase/postgres:14.1.0.21
+  meta: supabase/postgres-meta:v0.45.0
+  postgrest: postgrest/postgrest:v9.0.1
+  studio: supabase/studio:0.22.08
+  kong: kong:2.8.1

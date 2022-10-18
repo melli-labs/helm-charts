@@ -1,0 +1,2 @@
+Supabase is now set up!
+Make sure to run the migrations on the database.

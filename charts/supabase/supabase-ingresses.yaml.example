@@ -1,0 +1,51 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: supabase-api-ingress
+  namespace: default
+  labels:
+    name: supabase-api-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+    - hosts:
+        - "supabase.subdomain.example.com"
+      secretName: supabase-api-tls
+  rules:
+    - host: "supabase.subdomain.example.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: supabase-kong-service
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: supabase-studio-ingress
+  namespace: default
+  labels:
+    name: supabase-studio-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+    - hosts:
+        - "supabase-studio.subdomain.example.com"
+      secretName: supabase-studio-tls
+  rules:
+    - host: "supabase-studio.subdomain.example.com"
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: supabase-studio-service
+                port:
+                  number: 80

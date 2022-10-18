@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-db-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-db
+  template:
+    metadata:
+      labels:
+        app: supabase-db
+    spec:
+      containers:
+        - name: supabase-db
+          image: {{ .Values.images.db }}
+          ports:
+            - name: postgres
+              containerPort: 5432
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: POSTGRES_DB
+              value: app
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: password
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: supabase-db-pvc
+      imagePullSecrets:
+        - name: meetap-container-registry
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: supabase-db-pvc
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.global.storageClass }}
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-db-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-db
+  ports:
+    - port: 5432
+      targetPort: postgres
+      protocol: TCP

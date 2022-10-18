@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: interaction-manager-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: interaction-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: interaction-manager
+  template:
+    metadata:
+      labels:
+        app: interaction-manager
+    spec:
+      containers:
+        - name: interaction-manager
+          image:  {{ .Values.images.interactionManager }}
+          ports:
+            - name: app
+              containerPort: 4000
+          env:
+            - name: RASA_URL
+              value: http://rasa-service.{{ .Release.Namespace }}.svc.cluster.local
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: username
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: password
+            - name: MONGODB_URL
+              value: mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@mongodb-service.{{ .Release.Namespace }}.svc.cluster.local:27017
+            - name: INTERACTION_MANAGER_PORT
+              value: "4000"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+      imagePullSecrets: {{- .Values.imagePullSecrets | toYaml | nindent 10 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: interaction-manager-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: interaction-manager
+  ports:
+    - port: 80
+      targetPort: app
+      protocol: TCP

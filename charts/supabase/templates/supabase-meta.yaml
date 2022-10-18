@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-meta-config
+  namespace: {{ .Release.Namespace }}
+data:
+  PG_META_PORT: "8080"
+  PG_META_DB_HOST: "supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local"
+  PG_META_DB_PORT: "5432"
+  PG_META_DB_NAME: app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-meta-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-meta
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-meta
+  template:
+    metadata:
+      labels:
+        app: supabase-meta
+    spec:
+      containers:
+        - name: supabase-meta
+          image: {{ .Values.images.meta }}
+          ports:
+            - name: app
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: supabase-meta-config
+          env:
+            - name: PG_META_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: PG_META_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-meta-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-meta
+  ports:
+    - port: 80
+      targetPort: app
+      protocol: TCP

@@ -1,0 +1,29 @@
+# Default values for interaction-system.
+# This is a YAML-formatted file.
+
+# The following secrets need to be provided in the namespace where you install this chart
+
+# mongodb:
+#   username: secret-username
+#   password: secret-password
+
+# ---
+# Declare variables to be passed into your templates below
+
+# storage class to be used for the PersistenVolumeClaims in this chart
+storageClass: hcloud-volumes
+# names of the secrets, that allow access to your container registries
+imagePullSecrets:
+  - name: meetap-container-registry
+
+# information about where the supabase database can be accessed
+supabaseDatabase:
+  url: supabase-db-service.supabase.svc.cluster.local
+  port: 5432
+  dbName: app
+
+images:
+  eventEmitter: docker.meetap.de/rewrite/event-emitter:latest
+  interactionManager: docker.meetap.de/rewrite/interaction-manager:latest
+  mongodb: mongodb:6.0.2
+  scheduler: docker.meetap.de/rewrite/scheduler:latest

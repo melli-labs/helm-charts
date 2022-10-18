@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-auth-config
+  namespace: {{ .Release.Namespace }}
+data:
+  GOTRUE_API_HOST: 0.0.0.0
+  GOTRUE_API_PORT: "9999"
+  API_EXTERNAL_URL: https://supabase.example.com
+
+  GOTRUE_SITE_URL: https://supabase-studio.example.com
+  GOTRUE_URI_ALLOW_LIST: ""
+  GOTRUE_DISABLE_SIGNUP: "false"
+
+  GOTRUE_JWT_ADMIN_ROLES: service_role
+  GOTRUE_JWT_AUD: authenticated
+  GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+  GOTRUE_JWT_EXP: {{ .Values.jwt.exp | quote }}
+
+  GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+  GOTRUE_MAILER_AUTOCONFIRM: "false"
+  GOTRUE_SMTP_ADMIN_EMAIL: {{ .Values.smtp.admin_email | quote }}
+  GOTRUE_SMTP_SENDER_NAME: {{ .Values.smtp.sender_email | quote }}
+  GOTRUE_SMTP_HOST: {{ .Values.smtp.host | quote }}
+  GOTRUE_SMTP_PORT: {{ .Values.smtp.port | quote }}
+  GOTRUE_MAILER_URLPATHS_INVITE: "/auth/v1/verify"
+  GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify"
+  GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify"
+  GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: "/auth/v1/verify"
+
+  GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+  GOTRUE_SMS_AUTOCONFIRM: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-auth-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-auth
+  template:
+    metadata:
+      labels:
+        app: supabase-auth
+    spec:
+      containers:
+        - name: supabase-auth
+          image: {{ .Values.images.auth }}
+          ports:
+            - name: app
+              containerPort: 9999
+          envFrom:
+            - configMapRef:
+                name: supabase-auth-config
+          env:
+            # JWT
+            - name: GOTRUE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt
+                  key: secret
+            # DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: password
+            - name: GOTRUE_DB_DRIVER
+              value: postgres
+            - name: GOTRUE_DB_DATABASE_URL
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASS)@supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local:5432/app?search_path=auth
+            # SMTP
+            - name: GOTRUE_SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-smtp
+                  key: username
+            - name: GOTRUE_SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-smtp
+                  key: password
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-auth-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-auth
+  ports:
+    - port: 80
+      targetPort: app
+      protocol: TCP

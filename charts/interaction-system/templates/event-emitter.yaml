@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-emitter-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: event-emitter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-emitter
+  template:
+    metadata:
+      labels:
+        app: event-emitter
+    spec:
+      containers:
+        - name: event-emitter
+          image:  {{ .Values.images.eventEmitter }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: password
+            - name: DATABASE_URL
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local:5432/app
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+      imagePullSecrets: {{- .Values.imagePullSecrets | toYaml | nindent 10 }}

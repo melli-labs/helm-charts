@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-studio-config
+  namespace: {{ .Release.Namespace }}
+data:
+  SUPABASE_URL: http://supabase-kong-service.{{ .Release.Namespace }}.svc.cluster.local
+  SUPABASE_REST_URL: https://supabase.example.com/rest/v1/
+  STUDIO_PG_META_URL: http://supabase-meta-service.{{ .Release.Namespace }}.svc.cluster.local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-studio-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-studio
+  template:
+    metadata:
+      labels:
+        app: supabase-studio
+    spec:
+      containers:
+        - name: supabase-studio
+          image: {{ .Values.images.studio }}
+          ports:
+            - name: app
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: supabase-studio-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt
+                  key: anon_key
+            - name: SUPABASE_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt
+                  key: service_key
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-studio-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-studio
+  ports:
+    - port: 80
+      targetPort: app
+      protocol: TCP

@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-rest-config
+  namespace: {{ .Release.Namespace }}
+data:
+  PGRST_DB_SCHEMAS: public,storage
+  PGRST_DB_ANON_ROLE: anon
+  PGRST_DB_USE_LEGACY_GUCS: "false"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supabase-rest-deployment
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: supabase-rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supabase-rest
+  template:
+    metadata:
+      labels:
+        app: supabase-rest
+    spec:
+      containers:
+        - name: supabase-rest
+          image: {{ .Values.images.postgrest }}
+          ports:
+            - name: app
+              containerPort: 3000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "125m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          envFrom:
+            - configMapRef:
+                name: supabase-rest-config
+          env:
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-jwt
+                  key: secret
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: username
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-postgres
+                  key: password
+            - name: PGRST_DB_URI
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASS)@supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local:5432/app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: supabase-rest-service
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: supabase-rest
+  ports:
+    - port: 80
+      targetPort: app
+      protocol: TCP
