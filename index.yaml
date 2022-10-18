@@ -1,0 +1,36 @@
+apiVersion: v1
+entries:
+  interaction-system:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-10-18T11:34:17.551565622+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 375e382705dbca640be89aa1c9059697f0d2898b12514bd7f45db2c475b11638
+    name: interaction-system
+    type: application
+    urls:
+    - build/interaction-system-0.1.0.tgz
+    version: 0.1.0
+  nlp:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-10-18T11:34:17.552297553+02:00"
+    description: A Helm chart for Kubernetes
+    digest: b63a342324b4d23776b77d23067063f410450665f59d46ea8470708b31148b03
+    name: nlp
+    type: application
+    urls:
+    - build/nlp-0.1.0.tgz
+    version: 0.1.0
+  supabase:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2022-10-18T11:34:17.553349215+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 950ed6b7bddd4163bd8bb2bf7de661f6d6841e8554ff43b8d9e3f8e07141bffe
+    name: supabase
+    type: application
+    urls:
+    - build/supabase-0.1.0.tgz
+    version: 0.1.0
+generated: "2022-10-18T11:34:17.550508652+02:00"
