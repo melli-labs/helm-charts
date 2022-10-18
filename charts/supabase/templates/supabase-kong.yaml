@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: supabase-kong-config
+  name: supabase-kong-config-initial
   namespace: {{ .Release.Namespace }}
 data:
   kong.yml: |
@@ -13,10 +13,10 @@ data:
     consumers:
       - username: anon
         keyauth_credentials:
-          - key: {{ .Values.jwt.anon_key }}
+          - key: FAKE_JWT
       - username: service_role
         keyauth_credentials:
-          - key: {{ .Values.jwt.service_key }}
+          - key: FAKE_JWT
 
     ###
     ### Access Control List

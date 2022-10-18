@@ -30,3 +30,5 @@ metadata:
 data:
   SUPABASE_REST_URL: https://supabase.example.com/rest/v1/
 ```
+
+Additionally for kong we can't load the secrets as environment variables, but have to provide a config file instead. Therefore a configmap needs to be created, you can use the script `generate_kong_configmap` to generate it.
