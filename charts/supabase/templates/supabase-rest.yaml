@@ -45,17 +45,17 @@ spec:
             - name: PGRST_JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: supabase-jwt
+                  name: jwt
                   key: secret
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
             - name: POSTGRES_PASS
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: password
             - name: PGRST_DB_URI
               value: postgres://$(POSTGRES_USER):$(POSTGRES_PASS)@supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local:5432/app

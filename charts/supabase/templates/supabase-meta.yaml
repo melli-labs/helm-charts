@@ -39,12 +39,12 @@ spec:
             - name: PG_META_DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
             - name: PG_META_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
           resources:
             requests:

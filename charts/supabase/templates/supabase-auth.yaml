@@ -62,18 +62,18 @@ spec:
             - name: GOTRUE_JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: supabase-jwt
+                  name: jwt
                   key: secret
             # DB
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
             - name: POSTGRES_PASS
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: password
             - name: GOTRUE_DB_DRIVER
               value: postgres
@@ -83,12 +83,12 @@ spec:
             - name: GOTRUE_SMTP_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-smtp
+                  name: smtp
                   key: username
             - name: GOTRUE_SMTP_PASS
               valueFrom:
                 secretKeyRef:
-                  name: supabase-smtp
+                  name: smtp
                   key: password
           resources:
             requests:

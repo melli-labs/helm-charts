@@ -38,17 +38,17 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
             - name: SUPABASE_ANON_KEY
               valueFrom:
                 secretKeyRef:
-                  name: supabase-jwt
+                  name: jwt
                   key: anon_key
             - name: SUPABASE_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: supabase-jwt
+                  name: jwt
                   key: service_key
           resources:
             requests:

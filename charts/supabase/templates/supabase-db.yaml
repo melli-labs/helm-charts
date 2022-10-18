@@ -34,12 +34,12 @@ spec:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: supabase-postgres
+                  name: postgres
                   key: password
           volumeMounts:
             - name: db-data
