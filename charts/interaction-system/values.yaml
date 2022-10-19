@@ -25,5 +25,5 @@ supabaseDatabase:
 images:
   eventEmitter: docker.meetap.de/rewrite/event-emitter:latest
   interactionManager: docker.meetap.de/rewrite/interaction-manager:latest
-  mongodb: mongodb:6.0.2
+  mongodb: mongo:6.0.2
   scheduler: docker.meetap.de/rewrite/scheduler:latest
