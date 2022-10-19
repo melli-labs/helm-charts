@@ -30,7 +30,7 @@ spec:
                   name: postgres
                   key: password
             - name: DATABASE_URL
-              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@supabase-db-service.{{ .Release.Namespace }}.svc.cluster.local:5432/app
+              value: postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@{{ .Values.supabaseDatabase.url }}:{{ .Values.supabaseDatabase.port }}/{{ .Values.supabaseDatabase.dbName }}
           resources:
             requests:
               memory: "64Mi"
