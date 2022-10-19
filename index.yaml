@@ -3,9 +3,9 @@ entries:
   interaction-system:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2022-10-19T11:21:42.563002327+02:00"
+    created: "2022-10-19T11:24:04.317024024+02:00"
     description: A Helm chart for Kubernetes
-    digest: 386413a6734bf8cb8f88087ea3b9c4ea002d1ffc97e2ff14a4b628bcbec977c9
+    digest: 5274f10089510436c438f36de97b15b105c93b1ffe1a64ab75079a3ca15338e0
     name: interaction-system
     type: application
     urls:
@@ -14,9 +14,9 @@ entries:
   nlp:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2022-10-19T11:21:42.563937497+02:00"
+    created: "2022-10-19T11:24:04.317783404+02:00"
     description: A Helm chart for Kubernetes
-    digest: cea359ecf781fffb96d6fafc9f66f34474210a8a267d11274371a7ca5b89662f
+    digest: 23a03f61e073ed9904a7d59d5dc55d928ee412d72ec0e8d7d250743341e49238
     name: nlp
     type: application
     urls:
@@ -25,12 +25,12 @@ entries:
   supabase:
   - apiVersion: v2
     appVersion: 1.16.0
-    created: "2022-10-19T11:21:42.565501654+02:00"
+    created: "2022-10-19T11:24:04.318893526+02:00"
     description: A Helm chart for Kubernetes
-    digest: 14ff6381354a256a661490a60a905e282b923eb8ef4b95c4f85758dbd1688648
+    digest: 7ab478688fd784e7f8d3a50130e632dffda90b63baaa51e8e10ad21bac9378dd
     name: supabase
     type: application
     urls:
     - build/supabase-0.1.0.tgz
     version: 0.1.0
-generated: "2022-10-19T11:21:42.561208533+02:00"
+generated: "2022-10-19T11:24:04.315929476+02:00"
