@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: rasa-actions
-          image: {{ .Value.images.rasaActions }}
+          image: {{ .Values.images.rasaActions }}
           ports:
             - name: app
               containerPort: 5055

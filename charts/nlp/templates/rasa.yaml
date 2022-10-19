@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: rasa
-          image: {{ .Value.images.rasa }}
+          image: {{ .Values.images.rasa }}
           ports:
             - name: app
               containerPort: 5005

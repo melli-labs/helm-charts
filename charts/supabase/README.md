@@ -32,3 +32,7 @@ data:
 ```
 
 Additionally for kong we can't load the secrets as environment variables, but have to provide a config file instead. Therefore a configmap needs to be created, you can use the script `generate_kong_configmap` to generate it.
+
+## Database Setup
+
+To make the application work fully, we also need to run the migration scripts on the database. 
